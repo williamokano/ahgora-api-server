@@ -1,0 +1,22 @@
+{
+    "name": "williamokano/ahgora-api-server",
+    "description": "A simple (and unnoficial) ahgora punch query system",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "William Okano",
+            "email": "williamokano@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "silex/silex": "~2.0",
+        "williamokano/ahgora-api": "1.0.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "\\Katapoka\\Ahgora\\Server\\": "app/"
+        }
+    }
+}
