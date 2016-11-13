@@ -32,7 +32,7 @@ $app->before(function (Request $request) use ($app) {
     $neededHeaders = ['X-CompanyId', 'X-Username', 'X-Password'];
     foreach ($neededHeaders as $header) {
         if ($request->headers->get($header) === null) {
-            throw new InvalidArgumentException('Missing argument ' . $header);
+            throw new InvalidArgumentException('Missing header ' . $header);
         }
     }
 });
