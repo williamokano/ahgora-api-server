@@ -49,7 +49,10 @@ $punchesCallback = function (Request $request, $month = null, $year = null) use 
         ->setPassword($request->headers->get('X-Password'))
         ->doLogin();
 
-    $punchs = $api->getPunches((int) $month, (int) $year);
+    $month = is_string($month) ? (int) $month : $month;
+    $year = is_string($year) ? (int) $year : $year;
+
+    $punchs = $api->getPunches($month, $year);
 
     return $app->json($punchs);
 };
