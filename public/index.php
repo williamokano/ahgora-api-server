@@ -52,7 +52,7 @@ $punchesCallback = function (Request $request, $month = null, $year = null) use 
     $month = is_string($month) ? (int) $month : $month;
     $year = is_string($year) ? (int) $year : $year;
 
-    $punchs = $api->getPunches(str_pad($month, 2, '0', STR_PAD_LEFT), $year);
+    $punchs = $api->getPunches($month, $year);
 
     return $app->json($punchs);
 };
