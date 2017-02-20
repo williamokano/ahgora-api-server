@@ -27,26 +27,32 @@ $app->before(function (Request $request) {
     }
 });
 
-// Check for the necessary headers
-$app->before(function (Request $request) use ($app) {
-    $neededHeaders = ['X-CompanyId', 'X-Username', 'X-Password'];
-    foreach ($neededHeaders as $header) {
-        if ($request->headers->get($header) === null) {
-            throw new InvalidArgumentException('Missing header ' . $header);
-        }
-    }
-});
-
 $app->get('/', function () use ($app) {
     return $app->json(['message' => 'Hello World']);
 });
 
 $punchesCallback = function (Request $request, $month = null, $year = null) use ($app, $api) {
+
+    $parameters = [
+        'X-CompanyId' => 'company_id',
+        'X-Username'  => 'username',
+        'X-Password'  => 'password',
+    ];
+    $values = [];
+
+    foreach ($parameters as $header => $get) {
+        if (null === $request->header->get($header) && null === $request->request->get($get)) {
+            throw new InvalidArgumentException('Missing parameter ' . $header);
+        }
+
+        $values[$header] = $request->header->get($header) ?? $request->request->get($get);
+    }
+
     $api
         ->setDateTimeFormat('d/m/Y H:i')
-        ->setCompanyId($request->headers->get('X-CompanyId'))
-        ->setUsername($request->headers->get('X-Username'))
-        ->setPassword($request->headers->get('X-Password'))
+        ->setCompanyId($values['X-CompanyId'])
+        ->setUsername($values['X-Username'])
+        ->setPassword($values['X-Password'])
         ->doLogin();
 
     $month = is_string($month) ? (int) $month : $month;
