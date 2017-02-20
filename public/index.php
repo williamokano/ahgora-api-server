@@ -41,14 +41,13 @@ $punchesCallback = function (Request $request, $month = null, $year = null) use 
     $values = [];
 
     foreach ($parameters as $header => $get) {
-        $headerParam = $request->headers->get($header);
-        $getParam    = $request->request->get($get);
+        $param = $request->headers->get($header, $request->query->get($get));
 
-        if (null === $headerParam && null === $getParam) {
+        if (null === $param) {
             throw new InvalidArgumentException('Missing parameter ' . $header);
         }
 
-        $values[$header] = $headerParam ?? $getParam;
+        $values[$header] = $param;
     }
 
     $api
