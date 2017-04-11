@@ -31,13 +31,12 @@ $app->get('/', function () use ($app) {
     return $app->json(['message' => 'Hello World']);
 });
 
-$punchesCallback = function (Request $request, $month = null, $year = null) use ($app, $api) {
-
-    $parameters = [
+$getParams = function (Request $request, array $extra = []) {
+    $parameters = array_merge([
         'X-CompanyId' => 'company_id',
         'X-Username'  => 'username',
         'X-Password'  => 'password',
-    ];
+    ], $extra);
     $values = [];
 
     foreach ($parameters as $header => $get) {
@@ -49,6 +48,13 @@ $punchesCallback = function (Request $request, $month = null, $year = null) use 
 
         $values[$header] = $param;
     }
+
+    return $values;
+};
+
+$punchesCallback = function (Request $request, $month = null, $year = null) use ($app, $api, $getParams) {
+
+    $values = $getParams($request);
 
     $api
         ->setDateTimeFormat('d/m/Y H:i')
@@ -67,6 +73,40 @@ $punchesCallback = function (Request $request, $month = null, $year = null) use 
 
 $app->get('/punches', $punchesCallback);
 $app->get('/punches/{month}/{year}', $punchesCallback);
+
+$app->get('/punches/day', function (Request $request) use ($app, $api, $getParams) {
+    $values = $getParams($request, [
+        'day'    => 'day',
+        'month'  => 'month',
+        'year'   => 'year',
+        'format' => 'format',
+    ]);
+
+    $api
+        ->setDateTimeFormat('d/m/Y H:i')
+        ->setCompanyId($values['X-CompanyId'])
+        ->setUsername($values['X-Username'])
+        ->setPassword($values['X-Password'])
+        ->doLogin();
+
+    $punchesDay = $api->getPunchesFromDay($values['day'], $values['month'], $values['year']);
+    if ($values['format'] !== 'json') {
+        usort($punchesDay, function ($a, $b) {
+            /* Use spaceship operator maybe? */
+            if ($a == $b) {
+                return 0;
+            }
+
+            return $a < $b ? -1 : 1;
+        });
+
+        return implode('|', array_map(function (\DateTime $punch) {
+            return $punch->format("H:i");
+        }, $punchesDay));
+    } else {
+        return $app->json($punchesDay);
+    }
+});
 
 $app->error(function (\Exception $e) use ($app) {
     return $app->json(['error_message' => $e->getMessage()], 400);
