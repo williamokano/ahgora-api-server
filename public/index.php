@@ -89,7 +89,7 @@ $app->get('/punches/day', function (Request $request) use ($app, $api, $getParam
         ->setPassword($values['X-Password'])
         ->doLogin();
 
-    $punchesDay = $api->getPunchesFromDay($values['day'], $values['month'], $values['year']);
+    $punchesDay = array_values($api->getPunchesFromDay($values['day'], $values['month'], $values['year']));
     if ($values['format'] !== 'json') {
         usort($punchesDay, function ($a, $b) {
             /* Use spaceship operator maybe? */
