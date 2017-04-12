@@ -18,7 +18,7 @@ $guzzleClient = new Client([
     ],
 ]);
 $guzzleAdapter = new GuzzleAdapter($guzzleClient);
-$api = ApiFactory::create($guzzleAdapter, 'Http');
+$api = ApiFactory::create($guzzleAdapter, 'Rest');
 
 $app->before(function (Request $request) {
     if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
