@@ -12,7 +12,7 @@
     "minimum-stability": "stable",
     "require": {
         "silex/silex": "~2.0",
-        "williamokano/ahgora-api": "1.0.5"
+        "williamokano/ahgora-api": "1.0.6"
     },
     "autoload": {
         "psr-4": {

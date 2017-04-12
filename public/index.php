@@ -73,7 +73,7 @@ $punchesCallback = function (Request $request, $month = null, $year = null) use 
 
 $app->get('/punches', $punchesCallback);
 $app->get('/punches/{month}/{year}', $punchesCallback);
-
+function pad2($str) { return str_pad($str, 2, '0', STR_PAD_LEFT); }
 $app->get('/punches/day', function (Request $request) use ($app, $api, $getParams) {
     $values = $getParams($request, [
         'day'    => 'day',
@@ -89,20 +89,30 @@ $app->get('/punches/day', function (Request $request) use ($app, $api, $getParam
         ->setPassword($values['X-Password'])
         ->doLogin();
 
-    $punchesDay = array_values($api->getPunchesFromDay($values['day'], $values['month'], $values['year']));
+    $punches = $api->getPunches(intval($values['month']), $values['year']);
+    $punchesDay = array_values(array_filter($punches['punches'], function (\DateTime $punch) use ($values) {
+        return $punch->format('d-m') == sprintf('%02d-%02d', $values['day'], $values['month']);
+    }));
+
+    $extraDay = $punches['extra'][
+        sprintf(
+            '%s-%s-%s',
+            $values['year'],
+            pad2($values['month']),
+            pad2($values['day'])
+        )
+    ][0];
+
     if ($values['format'] !== 'json') {
-        usort($punchesDay, function ($a, $b) {
-            /* Use spaceship operator maybe? */
-            if ($a == $b) {
-                return 0;
-            }
+        usort($punchesDay, function ($a, $b) { $a <=> $b; });
 
-            return $a < $b ? -1 : 1;
-        });
-
-        return sprintf('%s;%s', $api->getEmployeeName(), implode('|', array_map(function (\DateTime $punch) {
-            return $punch->format("H:i");
-        }, $punchesDay)));
+        return sprintf(
+            '%s;%s;%s;%s',
+            $api->getEmployeeName(),
+            implode('|', array_map(function (\DateTime $punch) { return $punch->format("H:i"); }, $punchesDay)),
+            $extraDay['extra'],
+            $extraDay['falta']
+        );
     } else {
         return $app->json($punchesDay);
     }
