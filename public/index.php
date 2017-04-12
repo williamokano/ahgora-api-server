@@ -100,9 +100,9 @@ $app->get('/punches/day', function (Request $request) use ($app, $api, $getParam
             return $a < $b ? -1 : 1;
         });
 
-        return implode('|', array_map(function (\DateTime $punch) {
+        return sprintf('%s;%s', $api->getEmployeeName(), implode('|', array_map(function (\DateTime $punch) {
             return $punch->format("H:i");
-        }, $punchesDay));
+        }, $punchesDay)));
     } else {
         return $app->json($punchesDay);
     }
